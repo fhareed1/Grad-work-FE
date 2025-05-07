@@ -171,11 +171,11 @@ const MultiStepFormDialog = () => {
     if (departmentId) {
       setSupervisorId("");
       refetchSupervisors();
-      
+
       // Update formData with selected departmentId
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        departmentId: departmentId
+        departmentId: departmentId,
       }));
     }
   }, [departmentId, refetchSupervisors]);
@@ -183,9 +183,9 @@ const MultiStepFormDialog = () => {
   // Update formData when supervisorId changes
   useEffect(() => {
     if (supervisorId) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        supervisorId: supervisorId
+        supervisorId: supervisorId,
       }));
     }
   }, [supervisorId]);
@@ -269,10 +269,10 @@ const MultiStepFormDialog = () => {
 
     try {
       // Prepare form data without collegeId for submission
-      const submissionData = {
-        ...formData,
-        // Do not include collegeId in the submission data
-      };
+      // const submissionData = {
+      //   ...formData,
+      //   // Do not include collegeId in the submission data
+      // };
 
       // Simulate API call to backend
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -293,6 +293,7 @@ const MultiStepFormDialog = () => {
       setCurrentStep(2);
     } catch (err) {
       setError("Failed to submit project details. Please try again.");
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -328,6 +329,7 @@ const MultiStepFormDialog = () => {
       setIsComplete(true);
     } catch (err) {
       setError("Failed to upload file. Please try again.");
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -506,7 +508,7 @@ const MultiStepFormDialog = () => {
 
                 <div className="grid gap-2">
                   <Label htmlFor="abstract">Abstract (optional)</Label>
-                  <Textarea 
+                  <Textarea
                     id="abstract"
                     name="abstract"
                     value={formData.abstract}
@@ -554,13 +556,15 @@ const MultiStepFormDialog = () => {
                       disabled={!collegeId}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder={
-                          !collegeId 
-                            ? "Select a college first" 
-                            : departments.length > 0 
-                              ? "Select department" 
+                        <SelectValue
+                          placeholder={
+                            !collegeId
+                              ? "Select a college first"
+                              : departments.length > 0
+                              ? "Select department"
                               : "No departments available"
-                        } />
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -596,13 +600,15 @@ const MultiStepFormDialog = () => {
                       disabled={!departmentId}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder={
-                          !departmentId 
-                            ? "Select a department first" 
-                            : supervisors.length > 0 
-                              ? "Select supervisor" 
+                        <SelectValue
+                          placeholder={
+                            !departmentId
+                              ? "Select a department first"
+                              : supervisors.length > 0
+                              ? "Select supervisor"
                               : "No supervisors available"
-                        } />
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>

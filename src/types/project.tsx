@@ -1,4 +1,4 @@
-import { Department } from "./department";
+import { DepartmentType } from "./department";
 import { Tag } from "./tag";
 
 export interface Author {
@@ -49,7 +49,7 @@ export interface ProjectData {
   customFields: Record<string, unknown> | null;
   authors: Author[];
   supervisor: Supervisor;
-  department: Department;
+  department: DepartmentType;
   school: {
     id: string;
     name: string;
