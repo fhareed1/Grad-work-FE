@@ -18,6 +18,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/router/routes";
+import { toast } from "sonner";
 
 export function NavUser({
   user,
@@ -31,10 +34,18 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    toast("logged out");
+    navigate(ROUTES.login);
+  };
+  // TODO: add image to tab
+  
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -88,7 +99,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

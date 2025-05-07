@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  Bot,
-  GalleryVerticalEnd,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
+import { Bot, Settings2, SquareTerminal } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -21,6 +16,20 @@ import { useAuth } from "@/store/useAuth";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user, schoolName } = useAuth();
 
+  const getSchoolId = () => {
+    if (user?.schoolId === "d1525575-6e25-44aa-8d4b-a36e0114a695") {
+      return {
+        image: "/bells-logo.webp",
+        name: "Bells Logo",
+      };
+    }
+  };
+
+  const fallbackLogo = {
+    image: "/default-logo.webp",
+    name: "Default Logo"
+  };
+
   const data = {
     user: {
       name: `${user?.firstName} ${user?.lastName}`,
@@ -32,7 +41,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     teams: [
       {
         name: "Grad Works",
-        logo: GalleryVerticalEnd,
+        logo: getSchoolId() ?? fallbackLogo,
         school: schoolName || "",
       },
     ],

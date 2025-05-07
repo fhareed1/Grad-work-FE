@@ -16,7 +16,10 @@ const parsedUser: UserType | null = savedUser ? JSON.parse(savedUser) : null;
 export const useAuth = create<AuthState>((set) => {
   const initializeSchoolName = async (user: UserType | null) => {
     if (user?.schoolId) {
+      console.log("ENV:", import.meta.env.VITE_BASE_URL); // ✅ Correct
+
       const schools = await schoolServices.getAllSchools();
+
       const school = schools.find(
         (s: { id: string; name: string }) => s.id === user.schoolId
       );

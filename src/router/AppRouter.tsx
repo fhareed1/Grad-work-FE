@@ -8,6 +8,7 @@ import College from "@/pages/dashboard/college";
 import Department from "@/pages/dashboard/department";
 import Projects from "@/pages/dashboard/project/project";
 import ProjectDetails from "@/pages/dashboard/project/projectDetails";
+import ProtectedRoutes from "./ProtectedRouter";
 
 const AppRouter = () => {
   return (
@@ -17,17 +18,19 @@ const AppRouter = () => {
       <Route path={ROUTES.login} element={<Login />} />
       <Route path="*" element={<NotFound />} />
 
-      {/* Project Routes */}
-      <Route path={ROUTES.dashboard} element={<Dashboard />}>
-        {/* College */}
-        <Route path={ROUTES.college} element={<College />} />
+      <Route element={<ProtectedRoutes />}>
+        {/* Project Routes */}
+        <Route path={ROUTES.dashboard} element={<Dashboard />}>
+          {/* College */}
+          <Route path={ROUTES.college} element={<College />} />
 
-        {/* Department */}
-        <Route path={ROUTES.department} element={<Department />} />
+          {/* Department */}
+          <Route path={ROUTES.department} element={<Department />} />
 
-        {/* Projects */}
-        <Route path={ROUTES.project} element={<Projects />} />
-        <Route path={ROUTES.projectDetails} element={<ProjectDetails />} />
+          {/* Projects */}
+          <Route path={ROUTES.project} element={<Projects />} />
+          <Route path={ROUTES.projectDetails} element={<ProjectDetails />} />
+        </Route>
       </Route>
     </Routes>
   );
