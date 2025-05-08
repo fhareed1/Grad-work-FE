@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Bot, Settings2, SquareTerminal } from "lucide-react";
+import { SquareTerminal } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -27,7 +27,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const fallbackLogo = {
     image: "/default-logo.webp",
-    name: "Default Logo"
+    name: "Default Logo",
   };
 
   const data = {
@@ -48,38 +48,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     navMain: [
       {
         title: "Home",
-        url: "/",
+        url: `/school/${user?.schoolId}/college/`,
         icon: SquareTerminal,
         isActive: true,
         items: [
           {
             title: "Dashboard",
-            url: "/",
+            url: `/school/${user?.schoolId}/college`,
           },
         ],
       },
-      {
-        title: "Categories",
-        url: "#",
-        icon: Bot,
-        items: [
-          {
-            title: "Project categories",
-            url: "#",
-          },
-        ],
-      },
-      {
-        title: "Settings",
-        url: "#",
-        icon: Settings2,
-        items: [
-          {
-            title: "General",
-            url: "#",
-          },
-        ],
-      },
+      // {
+      //   title: "Categories",
+      //   url: "#",
+      //   icon: Bot,
+      //   items: [
+      //     {
+      //       title: "Project categories",
+      //       url: "#",
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "Settings",
+      //   url: "#",
+      //   icon: Settings2,
+      //   items: [
+      //     {
+      //       title: "General",
+      //       url: "#",
+      //     },
+      //   ],
+      // },
     ],
   };
 

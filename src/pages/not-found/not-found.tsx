@@ -13,7 +13,8 @@ export const NotFound = () => {
             The page you are looking for does not exist.
           </p>
           <Link
-            to={`school/${user?.schoolId}/college`}
+            to={`/school/${user?.schoolId}/college`}
+            replace
             className="block mt-5 text-purple-600 underline"
           >
             Go back to home
