@@ -32,7 +32,7 @@ const Projects = () => {
   const [sortBy, setSortBy] = useState<string>("newest");
   const [yearFilter, setYearFilter] = useState<string>("all");
 
-  const { schoolName } = useAuth();
+  const { user, schoolName } = useAuth();
   const { schoolId, collegeId, departmentId } = useParams<{
     schoolId: string;
     collegeId: string;
@@ -141,9 +141,20 @@ const Projects = () => {
     ...new Set(projects.map((project: ProjectData) => project.year)),
   ].sort((a: number, b: number) => b - a);
 
+  const getSchoolId = () => {
+    if (user?.schoolId === "d1525575-6e25-44aa-8d4b-a36e0114a695") {
+      return {
+        image: "/bells-logo-big.webp",
+        name: "Bells Logo",
+      };
+    }
+  };
+
   // Generate placeholder thumbnail if none exists
   const getProjectThumbnail = (project: ProjectData): string => {
-    return project.thumbnail || "/api/placeholder/400/300";
+    return (
+      project.thumbnail || getSchoolId()?.image || "/default-thumbnail.png"
+    );
   };
 
   // Format author names
@@ -276,13 +287,14 @@ const Projects = () => {
         </div>
 
         {/* Main Content - Projects List */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8 gap-4">
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
               <Loader2 className="animate-spin" />
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6">
+
               {filteredProjects.map((project: ProjectData) => (
                 <Link
                   to={`/school/${schoolId}/college/${collegeId}/department/${departmentId}/project/${project.id}`}

@@ -40,6 +40,17 @@ const College = () => {
     college.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const { user } = useAuth();
+
+  const getSchoolId = () => {
+    if (user?.schoolId === "d1525575-6e25-44aa-8d4b-a36e0114a695") {
+      return {
+        image: "/bells-logo-big.webp",
+        name: "Bells Logo",
+      };
+    }
+  };
+
   return (
     <DashboardLayout
       breadcrumbs={[
@@ -94,9 +105,9 @@ const College = () => {
                 >
                   <div className="h-40 bg-gray-200 relative">
                     <img
-                      src={college.image}
+                      src={getSchoolId()?.image || "/default-logo.webp"}
                       alt={college.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 p-4 text-white">

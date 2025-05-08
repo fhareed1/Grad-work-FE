@@ -1,4 +1,5 @@
 // import {ROUTES} from '@/router/routes';
+import { ROUTES } from "@/router/routes";
 import axios from "axios";
 
 const apiClient = axios.create({
@@ -30,9 +31,9 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // localStorage.removeItem("token");
-      console.log("Token would have been removed");
-      // window.location.href = ROUTES.login;
+      localStorage.removeItem("token");
+      // console.log("Token would have been removed");
+      window.location.href = ROUTES.login;
     }
     return Promise.reject(error);
   }

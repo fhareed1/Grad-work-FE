@@ -71,13 +71,48 @@ interface ProjectData {
 }
 
 const ProjectDetails = () => {
-  const { schoolName } = useAuth();
+  // const [copied, setCopied] = useState(false);
+  const { user, schoolName } = useAuth();
+
   const { schoolId, collegeId, departmentId, projectId } = useParams<{
     schoolId: string;
     collegeId: string;
     departmentId: string;
     projectId: string;
   }>();
+
+  const getSchoolId = () => {
+    if (user?.schoolId === "d1525575-6e25-44aa-8d4b-a36e0114a695") {
+      return {
+        image: "/bells-logo-big.webp",
+        name: "Bells Logo",
+      };
+    }
+  };
+
+  const handleNativeShare = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: document.title,
+          text: "Check out this project",
+          url: window.location.href,
+        })
+        .catch((error) => console.error("Error sharing", error));
+    } else {
+      alert("Sharing is not supported in your browser.");
+    }
+  };
+
+  // const handleShare = async () => {
+  //   try {
+  //     await navigator.clipboard.writeText(window.location.href);
+  //     setCopied(true);
+  //     setTimeout(() => setCopied(false), 2000); // Reset after 2s
+  //   } catch (err) {
+  //     console.error("Failed to copy URL:", err);
+  //   }
+  // };
 
   const { data: rawColleges } = useQuery({
     queryKey: ["colleges", schoolId],
@@ -298,7 +333,10 @@ const ProjectDetails = () => {
               </div>
 
               <div className="flex items-center space-x-3">
-                <button className="text-gray-600 hover:text-indigo-700">
+                <button
+                  onClick={handleNativeShare}
+                  className="text-gray-600 hover:text-indigo-700"
+                >
                   <Share2 size={18} />
                 </button>
 
@@ -326,7 +364,7 @@ const ProjectDetails = () => {
               {activeTab === "overview" && (
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <img
-                    src="/api/placeholder/800/400"
+                    src={getSchoolId()?.image || "/default-logo.webp"}
                     alt={project.title}
                     className="w-full h-auto rounded-lg mb-6"
                   />
@@ -574,9 +612,14 @@ const ProjectDetails = () => {
                   Have questions about this project? Reach out to the author for
                   more information.
                 </p>
-                <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg">
-                  Message Author
-                </button>
+                {project.authors.length > 0 && (
+                  <a
+                    href={`mailto:${project.authors[0].email}?subject=Inquiry about your project "${project.title}"`}
+                    className="w-full block text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg"
+                  >
+                    Message Author
+                  </a>
+                )}
               </div>
             </div>
           </div>

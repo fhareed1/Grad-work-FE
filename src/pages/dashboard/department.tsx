@@ -18,7 +18,7 @@ const Department = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const { schoolName } = useAuth();
+  const { user ,schoolName } = useAuth();
   const { schoolId, collegeId } = useParams();
 
   const { data: rawColleges } = useQuery({
@@ -76,6 +76,17 @@ const Department = () => {
   const filteredDepartments = departments.filter((dept) =>
     dept.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  
+
+  const getSchoolId = () => {
+    if (user?.schoolId === "d1525575-6e25-44aa-8d4b-a36e0114a695") {
+      return {
+        image: "/bells-logo-big.webp",
+        name: "Bells Logo",
+      };
+    }
+  };
 
   return (
     <DashboardLayout
@@ -195,9 +206,9 @@ const Department = () => {
               >
                 <div className="h-40 bg-gray-200 relative">
                   <img
-                    src={department.image || "placeholder.jpg"}
+                    src={getSchoolId()?.image || "/default-logo.webp"}
                     alt={department.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 p-4 text-white">
