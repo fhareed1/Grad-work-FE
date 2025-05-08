@@ -33,6 +33,24 @@ export interface ProjectFile {
   updatedAt: string;
 }
 
+export interface CreateProjectPayload {
+  title: string;
+  abstract?: string | null;
+  visibility?: string;
+  authorsId?: string[];
+  supervisorId?: string;
+  newSupervisor?: { name: string };
+  departmentId: string;
+  schoolId?: string;
+  year: string;
+  keywords?: string[];
+  customFields?: Record<string, unknown> | null;
+
+  categories?: string[];
+  tags?: Tag[];
+  files?: ProjectFile[];
+}
+
 export interface ProjectData {
   id: string;
   title: string;

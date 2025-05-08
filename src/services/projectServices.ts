@@ -1,4 +1,5 @@
 import apiClient from "@/config/axiosInstance";
+import { CreateProjectPayload } from "@/types/project";
 
 // Get all projects in a department
 const getAllProjects = async (
@@ -22,14 +23,23 @@ const getProjectById = async (
   const response = await apiClient.get(
     `/school/${school_id}/college/${college_id}/department/${department_id}/project/${project_id}`
   );
-  console.log("projectId: ", response.data);
 
   return response.data;
+};
+
+// Create a new project
+const createProject = async (payload: CreateProjectPayload, school_id: string) => {
+  const response = await apiClient.post(
+    `/school/${school_id}/project`,
+    payload
+  );
+  return response;
 };
 
 const projectServices = {
   getAllProjects,
   getProjectById,
+  createProject,
 };
 
 export default projectServices;

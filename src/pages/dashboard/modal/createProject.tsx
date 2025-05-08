@@ -8,6 +8,7 @@ import {
   File,
   Trash2,
   X,
+  Loader2,
 } from "lucide-react";
 
 // Import shadcn UI components
@@ -33,21 +34,31 @@ import {
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { CollegeWithDepartments } from "@/types/college";
 import collegeServices from "@/services/collegeServices";
 import { useParams } from "react-router-dom";
 import { DepartmentType, RawDepartment } from "@/types/department";
 import departmentServices from "@/services/departmentServices";
+import { toast } from "sonner";
+import { useAuth } from "@/store/useAuth";
+import projectServices from "@/services/projectServices";
+import { CreateProjectPayload } from "@/types/project";
+import { Input } from "@/components/ui/input";
+import { filePayloadType } from "@/types/file";
+import fileServices from "@/services/fileServices";
 
 interface FormData {
   title: string;
   abstract?: string;
   authorIds: string[];
-  supervisorId: string;
+  supervisor?: {
+    id?: string; // For existing supervisor
+    name?: string; // For new supervisor
+  };
   schoolId: string;
   departmentId: string;
-  year: number;
+  year: string;
 }
 
 interface FileData {
@@ -80,17 +91,23 @@ const MultiStepFormDialog = () => {
   // Selection states
   const [collegeId, setCollegeId] = useState("");
   const [departmentId, setDepartmentId] = useState("");
+  // const [supervisorState, setSupervisorState] = useState([]);
   const [supervisorId, setSupervisorId] = useState("");
+  const [showCreateNew, setShowCreateNew] = useState(false);
+  const [newSupervisorName, setNewSupervisorName] = useState("");
+  const { user } = useAuth();
+  const { schoolId } = useParams();
 
+  // Form fields for step 1
   // Form fields for step 1
   const [formData, setFormData] = useState<FormData>({
     title: "",
     abstract: "",
-    authorIds: ["563b20d0-a09e-49da-b54e-658b20fae506"], // Default author ID
-    supervisorId: "", // Will be populated when a supervisor is selected
-    schoolId: "43e7290d-008c-4a21-a89a-41389df568cb", // Default school ID
-    departmentId: "", // Will be populated when a department is selected
-    year: new Date().getFullYear(),
+    authorIds: [`${user?.id}`],
+    supervisor: {}, // Empty object instead of separate supervisorId and newSupervisor
+    schoolId: `${user?.schoolId}`,
+    departmentId: "",
+    year: "",
   });
 
   // Form fields for step 2
@@ -104,12 +121,11 @@ const MultiStepFormDialog = () => {
 
   // Validation states
   const [validated, setValidated] = useState(false);
-  const [fileValidated, setFileValidated] = useState(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isUploaded, setIsUploaded] = useState<boolean>(false);
 
   // Selected file reference
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const { schoolId } = useParams();
 
   // Fetch colleges
   const { data: colleges, status: collegeStatus } = useQuery<
@@ -157,6 +173,42 @@ const MultiStepFormDialog = () => {
     enabled: !!departmentId, // Only run query when departmentId is available
   });
 
+  // Create a project
+  const { mutateAsync: createProject } = useMutation({
+    mutationFn: async (payload: CreateProjectPayload) => {
+      const response = await projectServices.createProject(
+        payload,
+        schoolId as string
+      );
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data) {
+        toast("Project created successfully!");
+      } else {
+        toast("Failed to create project. Please try again.");
+      }
+    },
+    onError: () => {
+      toast("Failed to create project. Please try again.");
+    },
+  });
+
+  // Create a file
+  const { mutate: fileUpload, status } = useMutation({
+    mutationFn: async (payload: filePayloadType) => {
+      const response = await fileServices.createFile(payload);
+      return response;
+    },
+    onSuccess: () => {
+      setIsComplete(true);
+      toast("File uploaded successfully!");
+    },
+    onError: () => {
+      toast("Failed to upload file. Please try again.");
+    },
+  });
+
   // Reset department and supervisor selections when college changes
   useEffect(() => {
     if (collegeId) {
@@ -201,23 +253,18 @@ const MultiStepFormDialog = () => {
   }, [isOpen, isComplete]);
 
   // Validate step 1 form
+  // Validate step 1 form
   useEffect(() => {
     const isValid =
       formData.title.trim() !== "" &&
-      formData.abstract !== "" &&
       formData.authorIds.length > 0 &&
-      formData.supervisorId !== "" &&
+      (formData.supervisor?.id || formData.supervisor?.name) &&
       formData.schoolId !== "" &&
       formData.departmentId !== "" &&
-      formData.year > 0;
+      formData.year !== "";
 
-    setValidated(isValid);
+    setValidated(Boolean(isValid));
   }, [formData]);
-
-  // Validate step 2 form
-  useEffect(() => {
-    setFileValidated(selectedFile !== null);
-  }, [selectedFile]);
 
   // Handle field changes for step 1
   const handleChange = (
@@ -233,21 +280,94 @@ const MultiStepFormDialog = () => {
   // Handle file selection
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setFileData({
-        ...fileData,
-        filename: file.name,
-        mimetype: file.type,
-        size: file.size,
-        projectId: projectId || "", // Set from the response of step 1
-      });
+    setError(null);
+
+    if (!file) return;
+
+    // Validate file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
+      setError("File size exceeds 20MB limit");
+      return;
+    }
+
+    // Validate file type
+    const validTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!validTypes.includes(file.type)) {
+      setError("Only PDF, DOC, or DOCX files are allowed");
+      return;
+    }
+
+    // Set file data
+    setSelectedFile(file);
+    setFileData({
+      ...fileData,
+      filename: file.name,
+      mimetype: file.type,
+      size: file.size,
+    });
+  };
+
+  // Upload file to Cloudinary
+  const uploadToCloudinary = async () => {
+    if (!selectedFile) {
+      setError("Please select a file to upload");
+      return;
+    }
+
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      // Create FormData object for file upload
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      // Use the preset name from your example
+      formData.append("upload_preset", "final_year_projects");
+
+      // Make the API call to Cloudinary
+      const response = await fetch(
+        `${import.meta.env.VITE_CLOUDINARY_URL}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Error details:", errorData);
+        throw new Error(`Upload failed with status: ${response.status}`);
+      }
+
+      // Parse the response to get the uploaded file URL
+      const responseData = await response.json();
+
+      // Update fileData with the secure URL from Cloudinary
+      setFileData((prevData) => ({
+        ...prevData,
+        path: responseData.secure_url,
+      }));
+
+      setIsUploaded(true);
+      toast("File uploaded successfully!");
+    } catch (err) {
+      setError("Failed to upload file to Cloudinary. Please try again.");
+      console.error("Upload error:", err);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   // Remove selected file
   const handleRemoveFile = () => {
     setSelectedFile(null);
+
+    setIsUploaded(false);
     setFileData({
       ...fileData,
       filename: "",
@@ -255,6 +375,24 @@ const MultiStepFormDialog = () => {
       mimetype: "",
       size: 0,
     });
+    setError(null);
+  };
+
+  const toggleCreateMode = () => {
+    setShowCreateNew(!showCreateNew);
+    setSupervisorId(""); // Clear selected supervisor when switching modes
+    setNewSupervisorName(""); // Clear input when switching back
+  };
+
+  // When selecting an existing supervisor
+  const handleSelectSupervisor = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      supervisor: {
+        id,
+        name: undefined, // Clear any new supervisor name
+      },
+    }));
   };
 
   // Handle form submission for step 1
@@ -268,32 +406,39 @@ const MultiStepFormDialog = () => {
     setError(null);
 
     try {
-      // Prepare form data without collegeId for submission
-      // const submissionData = {
-      //   ...formData,
-      //   // Do not include collegeId in the submission data
-      // };
-
-      // Simulate API call to backend
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Mocked successful response with projectId
-      const response = {
-        success: true,
-        projectId: "af64bdac-555f-4feb-9863-5ebb6060df4f",
+      const basePayload = {
+        title: formData.title,
+        abstract: formData.abstract,
+        authorsId: formData.authorIds,
+        departmentId: formData.departmentId,
+        schoolId: formData.schoolId,
+        year: formData.year,
       };
 
-      setProjectId(response.projectId);
-      setFileData((prev) => ({
-        ...prev,
-        projectId: response.projectId,
-      }));
+      const payload: CreateProjectPayload = formData.supervisor?.id
+        ? { ...basePayload, supervisorId: formData.supervisor.id }
+        : {
+            ...basePayload,
+            newSupervisor: { name: formData.supervisor?.name || "" },
+          };
 
-      // Move to step 2
+      const response = await createProject(payload);
+
+      // Double-check the response structure matches your API
+      console.log("API Response:", response); // Debug log
+
+      if (!response?.data?.id) {
+        throw new Error("Project creation failed - no ID returned");
+      }
+
+      setProjectId(response.data.id);
+      setFileData((prev) => ({ ...prev, projectId: response.data.id }));
+
+      // Explicitly go to step 2
       setCurrentStep(2);
     } catch (err) {
-      setError("Failed to submit project details. Please try again.");
-      console.log(err);
+      setError("Failed to create project. Please try again.");
+      console.error("Submission error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -301,37 +446,56 @@ const MultiStepFormDialog = () => {
 
   // Handle form submission for step 2
   const handleSubmitStep2 = async () => {
-    if (!fileValidated) {
+    if (!projectId) {
+      setError("Missing project association");
+      return;
+    }
+
+    if (!selectedFile) {
       setError("Please select a file to upload");
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    if (!fileData.path) {
+      setError("Please upload the file to Cloudinary first");
+      return;
+    }
 
     try {
-      // Simulate API call to backend for file upload
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setIsUploading(true);
+      setError(null);
 
-      // Mocked successful response with file path
-      const response = {
-        success: true,
-        data: {
-          ...fileData,
-          path: "https://res.cloudinary.com/fhareed/image/upload/v1744655622/Digital%20repository%20for%20final%20year%20projects/Digital_repo_bsrttn.pdf",
-        },
+      // Prepare the payload with data from both selectedFile and fileData
+      const payload: filePayloadType = {
+        filename: selectedFile.name,
+        path: fileData.path, // Use the Cloudinary URL from fileData
+        mimetype: selectedFile.type,
+        size: selectedFile.size,
+        projectId: projectId,
       };
 
-      // Update fileData with the path from response
-      setFileData(response.data);
+      // Call your fileUpload service function
+      fileUpload(payload);
 
-      // Complete the form submission
+      // Update local state
+      setFileData((prev) => ({
+        ...prev,
+        projectId: projectId,
+      }));
+
+      // Mark as complete
       setIsComplete(true);
+      toast.success("Project submitted successfully!");
     } catch (err) {
-      setError("Failed to upload file. Please try again.");
-      console.log(err);
+      setError("Failed to submit file metadata");
+      toast.error(
+        `Submission error: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
+      console.error("Submission error:", err);
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -340,11 +504,11 @@ const MultiStepFormDialog = () => {
     setFormData({
       title: "",
       abstract: "",
-      authorIds: ["563b20d0-a09e-49da-b54e-658b20fae506"],
-      supervisorId: "",
-      schoolId: "43e7290d-008c-4a21-a89a-41389df568cb",
+      authorIds: [`${user?.id}`], // Keep the current user as default author
+      supervisor: {}, // Reset supervisor object
+      schoolId: `${user?.schoolId}`, // Keep the current school
       departmentId: "",
-      year: new Date().getFullYear(),
+      year: "",
     });
     setFileData({
       filename: "",
@@ -360,7 +524,9 @@ const MultiStepFormDialog = () => {
     setError(null);
     setCollegeId("");
     setDepartmentId("");
-    setSupervisorId("");
+    setSupervisorId(""); // Keep this if you're still using it for UI state
+    setNewSupervisorName(""); // Reset the new supervisor name input
+    setShowCreateNew(false); // Reset to showing existing supervisors
   };
 
   // Handle back button click
@@ -562,7 +728,7 @@ const MultiStepFormDialog = () => {
                               ? "Select a college first"
                               : departments.length > 0
                               ? "Select department"
-                              : "No departments available"
+                              : "Loading..."
                           }
                         />
                       </SelectTrigger>
@@ -590,46 +756,114 @@ const MultiStepFormDialog = () => {
 
                 {/* Supervisor - Only enabled when a department is selected */}
                 <div className="grid gap-2">
-                  <Label htmlFor="supervisor">
-                    Supervisor <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="flex items-center">
-                    <Select
-                      value={supervisorId}
-                      onValueChange={(value) => setSupervisorId(value)}
-                      disabled={!departmentId}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={
-                            !departmentId
-                              ? "Select a department first"
-                              : supervisors.length > 0
-                              ? "Select supervisor"
-                              : "No supervisors available"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Supervisor</SelectLabel>
-                          {supervisors.map((supervisor) => (
-                            <SelectItem
-                              key={supervisor.id}
-                              value={supervisor.id}
-                            >
-                              {supervisor.name}
-                            </SelectItem>
-                          ))}
-                          {supervisors.length === 0 && departmentId && (
-                            <SelectItem value="none" disabled>
-                              No supervisors available
-                            </SelectItem>
-                          )}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="supervisor">
+                      Supervisor <span className="text-red-500">*</span>
+                    </Label>
+                    {departmentId &&
+                      supervisors.length === 0 &&
+                      !showCreateNew && (
+                        <span className="text-sm text-blue-600">
+                          No supervisors found for this department
+                        </span>
+                      )}
+                    {departmentId && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleCreateMode}
+                        className="text-xs h-7"
+                      >
+                        {showCreateNew ? "Select Existing" : "Create New"}
+                      </Button>
+                    )}
                   </div>
+
+                  {!showCreateNew ? (
+                    <div className="flex items-center">
+                      <Select
+                        value={formData.supervisor?.id || ""}
+                        onValueChange={handleSelectSupervisor}
+                        disabled={!departmentId || supervisors.length === 0}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              !departmentId
+                                ? "Select a department first"
+                                : supervisors.length > 0
+                                ? "Select supervisor"
+                                : "No supervisors available"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Supervisor</SelectLabel>
+                            {supervisors.map((supervisor) => (
+                              <SelectItem
+                                key={supervisor.id}
+                                value={supervisor.id}
+                              >
+                                {supervisor.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      {formData.supervisor?.name ? (
+                        <div className="flex items-center gap-2 bg-gray-100 rounded-md px-3 py-2 w-full">
+                          <span className="flex-1">
+                            {formData.supervisor.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                supervisor: {},
+                              }));
+                            }}
+                            className="text-gray-500 hover:text-red-500"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <Input
+                            id="newSupervisor"
+                            placeholder="Enter supervisor name"
+                            value={newSupervisorName}
+                            onChange={(e) =>
+                              setNewSupervisorName(e.target.value)
+                            }
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (!newSupervisorName.trim()) return;
+                              setFormData((prev) => ({
+                                ...prev,
+                                supervisor: {
+                                  name: newSupervisorName.trim(),
+                                },
+                              }));
+                            }}
+                            disabled={!newSupervisorName.trim()}
+                            size="sm"
+                          >
+                            Add
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -668,10 +902,10 @@ const MultiStepFormDialog = () => {
                   disabled={!validated || isLoading}
                   className="flex items-center gap-2"
                 >
-                  {isLoading ? (
+                  {isLoading && status === "pending" ? (
                     <>
                       <span>Submitting...</span>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     </>
                   ) : (
                     <>
@@ -697,12 +931,7 @@ const MultiStepFormDialog = () => {
               </div>
 
               {!selectedFile ? (
-                <div
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer"
-                  onClick={() =>
-                    document.getElementById("file-upload")?.click()
-                  }
-                >
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
                   <Upload className="mx-auto h-10 w-10 text-gray-400" />
                   <div className="mt-3 flex text-sm text-gray-600">
                     <label
@@ -721,32 +950,62 @@ const MultiStepFormDialog = () => {
                     </label>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    PDF, DOC, or DOCX up to 10MB
+                    PDF, DOC, or DOCX up to 20MB
                   </p>
                 </div>
               ) : (
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <File className="h-8 w-8 text-blue-500" />
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">
-                          {selectedFile.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {(selectedFile.size / 1024).toFixed(2)} KB
-                        </p>
+                <div className="space-y-3">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <File className="h-8 w-8 text-blue-500" />
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-gray-900">
+                            {selectedFile.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="p-1 rounded-full text-gray-400 hover:text-red-500 focus:outline-none"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleRemoveFile}
-                      className="p-1 rounded-full text-gray-400 hover:text-red-500 focus:outline-none"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
                   </div>
+
+                  {!isUploaded ? (
+                    <Button
+                      onClick={uploadToCloudinary}
+                      disabled={isUploading}
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4" />
+                          <span>Upload file</span>
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <div className="bg-green-50 text-green-800 rounded-md p-3 text-sm">
+                      File successfully uploaded
+                    </div>
+                  )}
                 </div>
+              )}
+
+              {error && (
+                <div className="mt-2 text-sm text-red-600">{error}</div>
               )}
             </div>
 
@@ -773,19 +1032,10 @@ const MultiStepFormDialog = () => {
 
                 <Button
                   onClick={handleSubmitStep2}
-                  disabled={!fileValidated || isLoading}
+                  disabled={!isUploaded || isLoading}
                   className="flex items-center gap-2"
                 >
-                  {isLoading ? (
-                    <>
-                      <span>Uploading...</span>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    </>
-                  ) : (
-                    <>
-                      <span>Submit</span>
-                    </>
-                  )}
+                  <span>Submit</span>
                 </Button>
               </div>
             </DialogFooter>
