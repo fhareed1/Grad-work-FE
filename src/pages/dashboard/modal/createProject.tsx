@@ -356,7 +356,7 @@ const MultiStepFormDialog = () => {
       setIsUploaded(true);
       toast("File uploaded successfully!");
     } catch (err) {
-      setError("Failed to upload file to Cloudinary. Please try again.");
+      setError("Failed to upload file. Please try again.");
       console.error("Upload error:", err);
     } finally {
       setIsUploading(false);
@@ -457,7 +457,7 @@ const MultiStepFormDialog = () => {
     }
 
     if (!fileData.path) {
-      setError("Please upload the file to Cloudinary first");
+      setError("Please upload the file first");
       return;
     }
 
