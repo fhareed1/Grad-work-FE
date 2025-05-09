@@ -270,14 +270,17 @@ const ProjectDetails = () => {
             </div>
 
             <div className="flex flex-wrap gap-2 mb-2">
-              {project.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs"
-                >
-                  #{tag.replace(/\s+/g, "")}
-                </span>
-              ))}
+              {project.tags
+                .filter((tag) => typeof tag === "string")
+                .map((tag, index) => (
+                  <span
+                    key={index}
+                    className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs"
+                  >
+                    #{tag.replace(/\s+/g, "")}
+                  </span>
+                ))}
+
               {project.tags.length === 0 && (
                 <span className="text-gray-500 text-sm">No tags</span>
               )}

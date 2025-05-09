@@ -1,0 +1,7 @@
+1. school
+2. placement of success and response message
+3. side bar
+4. loading 
+5. The link bar
+6. Author ID
+7. error message for document... only PDfs
