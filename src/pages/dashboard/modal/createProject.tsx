@@ -184,13 +184,13 @@ const MultiStepFormDialog = () => {
     },
     onSuccess: (data) => {
       if (data) {
-        toast("Project created successfully!");
+        toast.success("Project created successfully!");
       } else {
-        toast("Failed to create project. Please try again.");
+        toast.error("Failed to create project. Please try again.");
       }
     },
     onError: () => {
-      toast("Failed to create project. Please try again.");
+      toast.error("Failed to create project. Please try again.");
     },
   });
 
@@ -202,10 +202,10 @@ const MultiStepFormDialog = () => {
     },
     onSuccess: () => {
       setIsComplete(true);
-      toast("File uploaded successfully!");
+      toast.success("File uploaded successfully!");
     },
     onError: () => {
-      toast("Failed to upload file. Please try again.");
+      toast.error("Failed to upload file. Please try again.");
     },
   });
 
@@ -330,13 +330,10 @@ const MultiStepFormDialog = () => {
       formData.append("upload_preset", "final_year_projects");
 
       // Make the API call to Cloudinary
-      const response = await fetch(
-        `${import.meta.env.VITE_CLOUDINARY_URL}`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_CLOUDINARY_URL}`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) {
         const errorData = await response.text();
@@ -354,7 +351,7 @@ const MultiStepFormDialog = () => {
       }));
 
       setIsUploaded(true);
-      toast("File uploaded successfully!");
+      toast.success("File uploaded successfully!");
     } catch (err) {
       setError("Failed to upload file. Please try again.");
       console.error("Upload error:", err);
@@ -902,7 +899,7 @@ const MultiStepFormDialog = () => {
                   disabled={!validated || isLoading}
                   className="flex items-center gap-2"
                 >
-                  {isLoading && status === "pending" ? (
+                  {status === "pending" ? (
                     <>
                       <span>Submitting...</span>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -944,7 +941,7 @@ const MultiStepFormDialog = () => {
                         name="file-upload"
                         type="file"
                         className="sr-only"
-                        accept=".pdf,.doc,.docx"
+                        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         onChange={handleFileChange}
                       />
                     </label>

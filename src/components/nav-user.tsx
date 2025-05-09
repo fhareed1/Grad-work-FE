@@ -41,11 +41,11 @@ export function NavUser({
 
   const handleLogout = () => {
     localStorage.clear();
-    toast("logged out");
+    toast.info("logged out");
     navigate(ROUTES.login);
   };
   // TODO: add image to tab
-  
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>

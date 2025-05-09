@@ -54,11 +54,11 @@ const Signup = () => {
         // Avoid unnecessary state updates
         setUser(data.data.user);
       }
-      toast(`Registration successful: ${data.data}`);
+      toast.success("Registration successful: You can now login");
       navigate(ROUTES.login);
     },
-    onError: (data) => {
-      toast(`Registration failed: ${data.message}`);
+    onError: () => {
+      toast.error(`Registration failed: Failed to sign Up`);
     },
   });
 
@@ -66,7 +66,7 @@ const Signup = () => {
     e.preventDefault();
 
     if (!role) {
-      toast("Role is required");
+      toast.error("Role is required");
       return;
     }
 
@@ -176,7 +176,7 @@ const Signup = () => {
                           onValueChange={(value) => setSchoolId(value)}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Role" />
+                            <SelectValue placeholder="Select School" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>

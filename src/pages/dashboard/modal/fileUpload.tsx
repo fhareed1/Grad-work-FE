@@ -145,7 +145,7 @@ const FileUploadComponent = ({
       }));
 
       setIsUploaded(true);
-      toast("File uploaded successfully!");
+      toast.success("File uploaded successfully!");
     } catch (err) {
       setError("Failed to upload file to Cloudinary. Please try again.");
       console.error("Upload error:", err);
