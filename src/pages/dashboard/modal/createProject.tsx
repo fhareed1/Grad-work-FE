@@ -99,11 +99,10 @@ const MultiStepFormDialog = () => {
   const { schoolId } = useParams();
 
   // Form fields for step 1
-  // Form fields for step 1
   const [formData, setFormData] = useState<FormData>({
     title: "",
     abstract: "",
-    authorIds: [`${user?.id}`],
+    authorIds: [user?.id ?? ""],
     supervisor: {}, // Empty object instead of separate supervisorId and newSupervisor
     schoolId: `${user?.schoolId}`,
     departmentId: "",
@@ -174,28 +173,29 @@ const MultiStepFormDialog = () => {
   });
 
   // Create a project
-  const { mutateAsync: createProject } = useMutation({
-    mutationFn: async (payload: CreateProjectPayload) => {
-      const response = await projectServices.createProject(
-        payload,
-        schoolId as string
-      );
-      return response;
-    },
-    onSuccess: (data) => {
-      if (data) {
-        toast.success("Project created successfully!");
-      } else {
+  const { mutateAsync: createProject, status: createProjectStatus } =
+    useMutation({
+      mutationFn: async (payload: CreateProjectPayload) => {
+        const response = await projectServices.createProject(
+          payload,
+          schoolId as string
+        );
+        return response;
+      },
+      onSuccess: (data) => {
+        if (data) {
+          toast.success("Project created successfully!");
+        } else {
+          toast.error("Failed to create project. Please try again.");
+        }
+      },
+      onError: () => {
         toast.error("Failed to create project. Please try again.");
-      }
-    },
-    onError: () => {
-      toast.error("Failed to create project. Please try again.");
-    },
-  });
+      },
+    });
 
   // Create a file
-  const { mutate: fileUpload, status } = useMutation({
+  const { mutate: fileUpload, status: fileStatus } = useMutation({
     mutationFn: async (payload: filePayloadType) => {
       const response = await fileServices.createFile(payload);
       return response;
@@ -293,6 +293,8 @@ const MultiStepFormDialog = () => {
     // Validate file type
     const validTypes = [
       "application/pdf",
+      "application/doc",
+      "application/docx",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ];
@@ -899,10 +901,10 @@ const MultiStepFormDialog = () => {
                   disabled={!validated || isLoading}
                   className="flex items-center gap-2"
                 >
-                  {status === "pending" ? (
+                  {createProjectStatus === "pending" ? (
                     <>
-                      <span>Submitting...</span>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className=" animate-spin" />
+                      <span className="cursor-pointer">Next</span>
                     </>
                   ) : (
                     <>
@@ -1032,7 +1034,14 @@ const MultiStepFormDialog = () => {
                   disabled={!isUploaded || isLoading}
                   className="flex items-center gap-2"
                 >
-                  <span>Submit</span>
+                  {fileStatus === "pending" ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      <span>Submit</span>
+                    </>
+                  )}
                 </Button>
               </div>
             </DialogFooter>

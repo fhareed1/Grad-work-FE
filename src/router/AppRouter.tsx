@@ -9,13 +9,31 @@ import Department from "@/pages/dashboard/department";
 import Projects from "@/pages/dashboard/project/project";
 import ProjectDetails from "@/pages/dashboard/project/projectDetails";
 import ProtectedRoutes from "./ProtectedRouter";
+import PublicRoutes from "./PublicRoutes";
 
 const AppRouter = () => {
   return (
     <Routes>
       {/* Auth Routes */}
-      <Route path={ROUTES.signUp} element={<Signup />} />
-      <Route path={ROUTES.login} element={<Login />} />
+      {/* Public (auth) routes */}
+      <Route
+        path={ROUTES.login}
+        element={
+          <PublicRoutes>
+            <Login />
+          </PublicRoutes>
+        }
+      />
+      <Route
+        path={ROUTES.signUp}
+        element={
+          <PublicRoutes>
+            <Signup />
+          </PublicRoutes>
+        }
+      />
+
+      {/* Catch-all */}
       <Route path="*" element={<NotFound />} />
 
       <Route element={<ProtectedRoutes />}>

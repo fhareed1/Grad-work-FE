@@ -1,22 +1,22 @@
-import {useState, useEffect} from 'react';
-import {Outlet, useNavigate} from 'react-router-dom';
-import {Loader} from 'lucide-react';
-import { ROUTES } from './routes';
-
+import { useState, useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Loader } from "lucide-react";
+import { ROUTES } from "./routes";
 
 const ProtectedRoutes = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const savedToken: string | null = localStorage.getItem('token');
-  const token: string | null = savedToken ? JSON.parse(savedToken) : null;
-
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const token = savedToken ? JSON.parse(savedToken) : null;
+
     if (!token) {
-      navigate(ROUTES.login);
+      navigate(ROUTES.login, { replace: true });
+    } else {
+      setIsLoading(false); 
     }
-    setIsLoading(false);
-  }, [token, navigate]);
+  }, [navigate]);
 
   if (isLoading) {
     return (
