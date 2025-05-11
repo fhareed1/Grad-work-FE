@@ -11,10 +11,10 @@ const login = async (payload: LoginType) => {
 
 const signUp = async (payload: SignUpType) => {
   const response = await apiClient.post("/auth/register", payload);
-  // Store the token
-  localStorage.setItem("token", response.data.token);
-  // Store user data
-  localStorage.setItem("user", JSON.stringify(response.data.user));
+  // // Store the token
+  // localStorage.setItem("token", response.data.token);
+  // // Store user data
+  // localStorage.setItem("user", JSON.stringify(response.data.user));
   return response;
 };
 
