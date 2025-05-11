@@ -4,10 +4,12 @@ export const ROUTES = {
   signUp: "/auth/register",
 
   // Dashboard
-  home: '/',
+  home: "/",
   dashboard: "/school/:schoolId",
   college: "/school/:schoolId/college",
   department: "/school/:schoolId/college/:collegeId/department",
-  project: '/school/:schoolId/college/:collegeId/department/:departmentId/projects',
-  projectDetails: '/school/:schoolId/college/:collegeId/department/:departmentId/project/:projectId'
+  project:
+    "/school/:schoolId/college/:collegeId/department/:departmentId/projects",
+  projectDetails:
+    "/school/:schoolId/college/:collegeId/department/:departmentId/project/:projectId",
 };

@@ -38,10 +38,10 @@ const AppRouter = () => {
       <Route path="*" element={<NotFound />} />
 
       <Route element={<ProtectedRoutes />}>
+        {/* Home routes */}
+        <Route path={ROUTES.home} element={<Home />} />
         {/* Project Routes */}
         <Route path={ROUTES.dashboard} element={<Dashboard />}>
-          {/* Home routes */}
-          <Route path={ROUTES.home} element={<Home />} />
           {/* College */}
           <Route path={ROUTES.college} element={<College />} />
 
