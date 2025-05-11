@@ -159,11 +159,9 @@ const Projects = () => {
 
   // Format author names
   const getAuthorNames = (authors: Author[]): string => {
-    return (
-      authors
-        .map((author: Author) => `${author.firstName} ${author.lastName}`)
-        .join(", ") || "Unknown"
-    );
+    return authors?.length
+      ? authors.map((a) => `${a.firstName} ${a.lastName}`).join(", ")
+      : "Unknown";
   };
 
   // Get tags for a project
@@ -294,7 +292,6 @@ const Projects = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6">
-
               {filteredProjects.map((project: ProjectData) => (
                 <Link
                   to={`/school/${schoolId}/college/${collegeId}/department/${departmentId}/project/${project.id}`}

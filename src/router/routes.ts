@@ -4,6 +4,7 @@ export const ROUTES = {
   signUp: "/auth/register",
 
   // Dashboard
+  home: '/',
   dashboard: "/school/:schoolId",
   college: "/school/:schoolId/college",
   department: "/school/:schoolId/college/:collegeId/department",

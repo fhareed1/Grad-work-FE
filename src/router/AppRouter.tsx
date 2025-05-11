@@ -10,6 +10,7 @@ import Projects from "@/pages/dashboard/project/project";
 import ProjectDetails from "@/pages/dashboard/project/projectDetails";
 import ProtectedRoutes from "./ProtectedRouter";
 import PublicRoutes from "./PublicRoutes";
+import { Home } from "@/pages/dashboard/home";
 
 const AppRouter = () => {
   return (
@@ -39,6 +40,8 @@ const AppRouter = () => {
       <Route element={<ProtectedRoutes />}>
         {/* Project Routes */}
         <Route path={ROUTES.dashboard} element={<Dashboard />}>
+          {/* Home routes */}
+          <Route path={ROUTES.home} element={<Home />} />
           {/* College */}
           <Route path={ROUTES.college} element={<College />} />
 

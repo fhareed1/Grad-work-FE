@@ -10,8 +10,6 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-
-// Import shadcn UI components
 import {
   Dialog,
   DialogContent,
@@ -408,7 +406,7 @@ const MultiStepFormDialog = () => {
       const basePayload = {
         title: formData.title,
         abstract: formData.abstract,
-        authorsId: formData.authorIds,
+        authorIds: formData.authorIds,
         departmentId: formData.departmentId,
         schoolId: formData.schoolId,
         year: formData.year,
@@ -423,8 +421,6 @@ const MultiStepFormDialog = () => {
 
       const response = await createProject(payload);
 
-      // Double-check the response structure matches your API
-      console.log("API Response:", response); // Debug log
 
       if (!response?.data?.id) {
         throw new Error("Project creation failed - no ID returned");
