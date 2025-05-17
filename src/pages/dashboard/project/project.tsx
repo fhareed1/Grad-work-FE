@@ -10,12 +10,12 @@ import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen,
   Calendar,
-  Download,
-  Eye,
+  // Download,
+  // Eye,
   Filter,
   Loader2,
   Search,
-  ThumbsUp,
+  // ThumbsUp,
   User,
 } from "lucide-react";
 import { useState } from "react";
@@ -354,7 +354,7 @@ const Projects = () => {
                           View Project →
                         </a>
 
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        {/* <div className="flex items-center space-x-4 text-sm text-gray-500">
                           <div className="flex items-center">
                             <Eye size={14} className="mr-1" />
                             <span>{project.views || 0}</span>
@@ -367,7 +367,7 @@ const Projects = () => {
                             <ThumbsUp size={14} className="mr-1" />
                             <span>{project.likes || 0}</span>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>

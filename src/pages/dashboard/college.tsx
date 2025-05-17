@@ -68,7 +68,7 @@ const College = () => {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search for projects, departments..."
+                placeholder="Search for colleges..."
                 className="w-full px-4 py-2 pl-10 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
