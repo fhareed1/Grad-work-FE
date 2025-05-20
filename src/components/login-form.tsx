@@ -32,7 +32,6 @@ export function LoginForm({
     mutationFn: (payload: LoginType) => authServices.login(payload),
     onSuccess: (response) => {
       const schoolId = response.data.user.schoolId;
-
       toast.success("Login successful");
       navigate(`/school/${schoolId}/college`);
     },
