@@ -42,24 +42,33 @@ export default function DashboardSidebar({
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               {breadcrumbs.length > 0 && (
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    {breadcrumbs.map((item, index) => (
-                      <BreadcrumbItem key={index}>
-                        {item.href ? (
-                          <BreadcrumbLink href={item.href}>
-                            {item.label}
-                          </BreadcrumbLink>
-                        ) : (
-                          <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                        )}
-                        {index < breadcrumbs.length - 1 && (
-                          <BreadcrumbSeparator />
-                        )}
-                      </BreadcrumbItem>
-                    ))}
-                  </BreadcrumbList>
-                </Breadcrumb>
+                <div className="hidden md:block">
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      {breadcrumbs.map((item, index) => {
+                        const truncatedLabel =
+                          item.label.length > 20
+                            ? item.label.slice(0, 20) + "..."
+                            : item.label;
+
+                        return (
+                          <BreadcrumbItem key={index}>
+                            {item.href ? (
+                              <BreadcrumbLink href={item.href}>
+                                {truncatedLabel}
+                              </BreadcrumbLink>
+                            ) : (
+                              <BreadcrumbPage>{truncatedLabel}</BreadcrumbPage>
+                            )}
+                            {index < breadcrumbs.length - 1 && (
+                              <BreadcrumbSeparator />
+                            )}
+                          </BreadcrumbItem>
+                        );
+                      })}
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
               )}
             </div>
 

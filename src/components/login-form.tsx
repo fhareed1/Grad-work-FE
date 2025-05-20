@@ -30,9 +30,9 @@ export function LoginForm({
   // React Query
   const { mutate: login, status } = useMutation({
     mutationFn: (payload: LoginType) => authServices.login(payload),
-    onSuccess:  (response) => {
+    onSuccess: (response) => {
       const schoolId = response.data.user.schoolId;
-    
+
       toast.success("Login successful");
       navigate(`/school/${schoolId}/college`);
     },
@@ -59,6 +59,11 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <div className="flex flex-row items-center gap-2 align-middle justify-center">
+        <img src={"/favicon.svg"} alt={""} className="w-10 h-10" color="black" style={{ color: 'black' }} />
+        <p className="text-2xl font-medium ">Gradworks</p>
+      </div>
+
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>

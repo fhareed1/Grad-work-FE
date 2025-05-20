@@ -40,7 +40,7 @@ export function NavUser({
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     toast.info("logged out");
     navigate(ROUTES.login);
   };

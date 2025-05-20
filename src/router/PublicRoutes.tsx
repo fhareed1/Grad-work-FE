@@ -1,10 +1,12 @@
-import React from 'react'; 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/store/useAuth';
+import React from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/store/useAuth";
 
-const PublicRoutes: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const savedToken: string | null = localStorage.getItem('token');
+const PublicRoutes: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const savedToken: string | null = sessionStorage.getItem("token");
   const token: string | null = savedToken ? JSON.parse(savedToken) : null;
 
   const { user } = useAuth();

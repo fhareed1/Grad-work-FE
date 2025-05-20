@@ -78,6 +78,13 @@ interface Supervisor {
 const MultiStepFormDialog = () => {
   // Dialog state
   const [isOpen, setIsOpen] = useState(false);
+  const messages = [
+    "Uploading...",
+    "Still working...",
+    "Almost there...",
+    "Hold tight...",
+  ];
+  const [messageIndex, setMessageIndex] = useState(0);
 
   // Form states
   const [currentStep, setCurrentStep] = useState(1);
@@ -192,6 +199,15 @@ const MultiStepFormDialog = () => {
       },
     });
 
+  useEffect(() => {
+    if (createProjectStatus === "pending") {
+      const interval = setInterval(() => {
+        setMessageIndex((prevIndex) => (prevIndex + 1) % messages.length);
+      }, 5000); // update every 5 seconds
+      return () => clearInterval(interval); // cleanup on unmount or when status changes
+    }
+  }, [createProjectStatus, messages.length]);
+
   // Create a file
   const { mutate: fileUpload, status: fileStatus } = useMutation({
     mutationFn: async (payload: filePayloadType) => {
@@ -251,7 +267,7 @@ const MultiStepFormDialog = () => {
   }, [isOpen, isComplete]);
 
   // Validate step 1 form
-  // Validate step 1 form
+  
   useEffect(() => {
     const isValid =
       formData.title.trim() !== "" &&
@@ -420,7 +436,6 @@ const MultiStepFormDialog = () => {
           };
 
       const response = await createProject(payload);
-
 
       if (!response?.data?.id) {
         throw new Error("Project creation failed - no ID returned");
@@ -899,8 +914,10 @@ const MultiStepFormDialog = () => {
                 >
                   {createProjectStatus === "pending" ? (
                     <>
-                      <Loader2 className=" animate-spin" />
-                      <span className="cursor-pointer">Next</span>
+                      <Loader2 className="animate-spin" />
+                      <span className="cursor-pointer">
+                        {messages[messageIndex]}
+                      </span>
                     </>
                   ) : (
                     <>
@@ -1051,7 +1068,10 @@ const MultiStepFormDialog = () => {
     <div className="flex flex-col items-center justify-center p-4">
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button size="lg" className="px-6 cursor-pointer">
+          <Button
+            size="lg"
+            className="px-6 cursor-pointer bg-indigo-600 hover:bg-indigo-700"
+          >
             Create Project
           </Button>
         </DialogTrigger>

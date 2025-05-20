@@ -233,10 +233,7 @@ const ProjectDetails = () => {
           href: `/school/${schoolId}/college/${collegeId}/department/${departmentId}/project`,
         },
         {
-          label:
-            project.title.length > 30
-              ? project.title.substring(0, 30) + "..."
-              : project.title,
+          label: project.title || "",
           href: `/school/${schoolId}/college/${collegeId}/department/${departmentId}/project/${projectId}`,
         },
       ]}
@@ -434,7 +431,7 @@ const ProjectDetails = () => {
                         href={mainPdfFile.path}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg flex items-center mx-auto"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg flex items-center mx-auto justify-center"
                       >
                         <Download size={16} className="mr-2" />
                         <span>Download Full Text</span>

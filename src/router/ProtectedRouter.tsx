@@ -8,13 +8,13 @@ const ProtectedRoutes = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
+    const savedToken = sessionStorage.getItem("token");
     const token = savedToken ? JSON.parse(savedToken) : null;
 
     if (!token) {
       navigate(ROUTES.login, { replace: true });
     } else {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   }, [navigate]);
 

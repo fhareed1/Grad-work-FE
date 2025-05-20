@@ -8,15 +8,14 @@ interface AuthState {
   setUser: (user: UserType | null) => void;
 }
 
-const savedUser: string | null = localStorage.getItem("user");
-const savedSchoolName: string | null = localStorage.getItem("schoolName");
+const savedUser: string | null = sessionStorage.getItem("user");
+const savedSchoolName: string | null = sessionStorage.getItem("schoolName");
 
 const parsedUser: UserType | null = savedUser ? JSON.parse(savedUser) : null;
 
 export const useAuth = create<AuthState>((set) => {
   const initializeSchoolName = async (user: UserType | null) => {
     if (user?.schoolId) {
-
       const schools = await schoolServices.getAllSchools();
 
       const school = schools.find(
@@ -25,13 +24,13 @@ export const useAuth = create<AuthState>((set) => {
       const schoolName = school?.name || null;
       set({ schoolName });
       if (schoolName) {
-        localStorage.setItem("schoolName", schoolName);
+        sessionStorage.setItem("schoolName", schoolName);
       } else {
-        localStorage.removeItem("schoolName");
+        sessionStorage.removeItem("schoolName");
       }
     } else {
       set({ schoolName: null });
-      localStorage.removeItem("schoolName");
+      sessionStorage.removeItem("schoolName");
     }
   };
 
@@ -45,9 +44,9 @@ export const useAuth = create<AuthState>((set) => {
     schoolName: savedSchoolName, // use cached name first
     setUser: async (user) => {
       if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
+        sessionStorage.setItem("user", JSON.stringify(user));
       } else {
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
       }
       set({ user });
       await initializeSchoolName(user);
