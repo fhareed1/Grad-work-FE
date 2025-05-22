@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 const College = () => {
-  const { schoolName } = useAuth();
+  const { user, schoolName, hydrated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
   const { schoolId } = useParams();
@@ -18,6 +18,7 @@ const College = () => {
   >({
     queryKey: ["colleges"],
     queryFn: () => collegeServices.getAllColleges(schoolId as string),
+    enabled: hydrated && !!schoolId, // 👈 Wait for auth to hydrate
   });
 
   const colleges = useMemo(() => {
@@ -39,8 +40,6 @@ const College = () => {
   const filteredColleges = colleges.filter((college) =>
     college.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const { user } = useAuth();
 
   const getSchoolId = () => {
     if (user?.schoolId === "d1525575-6e25-44aa-8d4b-a36e0114a695") {
@@ -145,9 +144,9 @@ const College = () => {
               </div>
             )}
           </div>
-        ) : (
+        ) : !hydrated ? (
           <Loader2 className="animate-spin" />
-        )}
+        ) : null}
       </div>
     </DashboardLayout>
   );

@@ -72,7 +72,7 @@ interface ProjectData {
 
 const ProjectDetails = () => {
   // const [copied, setCopied] = useState(false);
-  const { user, schoolName } = useAuth();
+  const { user, schoolName, hydrated } = useAuth();
 
   const { schoolId, collegeId, departmentId, projectId } = useParams<{
     schoolId: string;
@@ -117,7 +117,7 @@ const ProjectDetails = () => {
   const { data: rawColleges } = useQuery({
     queryKey: ["colleges", schoolId],
     queryFn: () => collegeServices.getAllColleges(schoolId as string),
-    enabled: !!schoolId,
+    enabled: hydrated && !!schoolId,
   });
 
   const college: College | undefined = rawColleges?.find(
@@ -157,9 +157,11 @@ const ProjectDetails = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-600">Loading project data...</div>
-        </div>
+        {!hydrated ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-gray-600">Loading project data...</div>
+          </div>
+        ) : null}
       </DashboardLayout>
     );
   }

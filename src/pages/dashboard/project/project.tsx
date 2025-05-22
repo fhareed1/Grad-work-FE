@@ -32,7 +32,7 @@ const Projects = () => {
   const [sortBy, setSortBy] = useState<string>("newest");
   const [yearFilter, setYearFilter] = useState<string>("all");
 
-  const { user, schoolName } = useAuth();
+  const { user, schoolName, hydrated } = useAuth();
   const { schoolId, collegeId, departmentId } = useParams<{
     schoolId: string;
     collegeId: string;
@@ -42,7 +42,7 @@ const Projects = () => {
   const { data: rawColleges } = useQuery({
     queryKey: ["colleges", schoolId],
     queryFn: () => collegeServices.getAllColleges(schoolId as string),
-    enabled: !!schoolId,
+    enabled: hydrated && !!schoolId,
   });
 
   const college: College | undefined = rawColleges?.find(
@@ -287,9 +287,11 @@ const Projects = () => {
         {/* Main Content - Projects List */}
         <div className="max-w-7xl mx-auto px-4 py-8 gap-4">
           {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="animate-spin" />
-            </div>
+            !hydrated ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="animate-spin" />
+              </div>
+            ) : null
           ) : (
             <div className="grid grid-cols-1 gap-6">
               {filteredProjects.map((project: ProjectData) => (

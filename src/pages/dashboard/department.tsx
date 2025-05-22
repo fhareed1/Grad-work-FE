@@ -8,7 +8,6 @@ import { Loader2, Search, Tag } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-
 interface College {
   id: string;
   name: string;
@@ -18,13 +17,13 @@ const Department = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const { user ,schoolName } = useAuth();
+  const { user, schoolName, hydrated } = useAuth();
   const { schoolId, collegeId } = useParams();
 
   const { data: rawColleges } = useQuery({
     queryKey: ["colleges", schoolId],
     queryFn: () => collegeServices.getAllColleges(schoolId as string),
-    enabled: !!schoolId,
+    enabled: hydrated && !!schoolId,
   });
 
   const college: College | undefined = rawColleges?.find(
@@ -33,7 +32,7 @@ const Department = () => {
   const collegeName = college?.name ?? "...";
 
   const { data: departments = [], status: departmentStatus } = useQuery<
-  DepartmentType[]
+    DepartmentType[]
   >({
     queryKey: ["departments"],
     queryFn: async (): Promise<DepartmentType[]> => {
@@ -76,8 +75,6 @@ const Department = () => {
   const filteredDepartments = departments.filter((dept) =>
     dept.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  
 
   const getSchoolId = () => {
     if (user?.schoolId === "d1525575-6e25-44aa-8d4b-a36e0114a695") {
@@ -246,9 +243,9 @@ const Department = () => {
             </div>
           )}
         </div>
-      ) : (
+      ) : !hydrated ? (
         <Loader2 className="animate-spin" />
-      )}
+      ) : null}
     </DashboardLayout>
   );
 };
