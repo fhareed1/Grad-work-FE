@@ -4,7 +4,7 @@ import departmentServices from "@/services/departmentServices";
 import { useAuth } from "@/store/useAuth";
 import { DepartmentType, RawDepartment } from "@/types/department";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Search, Tag } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -51,18 +51,18 @@ const Department = () => {
     },
   });
 
-  const tags: string[] = [
-    "Machine Learning",
-    "Data Science",
-    "IoT",
-    "Robotics",
-    "Sustainability",
-    "Software Engineering",
-    "Artificial Intelligence",
-    "Virtual Reality",
-    "Networks",
-    "Cybersecurity",
-  ];
+  // const tags: string[] = [
+  //   "Machine Learning",
+  //   "Data Science",
+  //   "IoT",
+  //   "Robotics",
+  //   "Sustainability",
+  //   "Software Engineering",
+  //   "Artificial Intelligence",
+  //   "Virtual Reality",
+  //   "Networks",
+  //   "Cybersecurity",
+  // ];
 
   const toggleTag = (tag: string) => {
     if (selectedTags.includes(tag)) {
@@ -137,7 +137,7 @@ const Department = () => {
         </div>
       </div>
       {/* Tags Section */}
-      <div className="bg-white border-b shadow-sm">
+      {/* <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center">
             <Tag size={18} className="text-gray-400 mr-3" />
@@ -160,7 +160,7 @@ const Department = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* Main Content */}
       {departmentStatus !== "pending" ? (
         <div className="max-w-7xl mx-auto px-4 py-8">
