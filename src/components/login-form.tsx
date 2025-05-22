@@ -34,6 +34,10 @@ export function LoginForm({
       const schoolId = response.data.user.schoolId;
       toast.success("Login successful");
       navigate(`/school/${schoolId}/college`);
+      // Then reload the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 100); // 100ms should be enough
     },
     onError: (data) => {
       toast.error(`Login failed: ${data.message}`);
@@ -59,7 +63,13 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-row items-center gap-2 align-middle justify-center">
-        <img src={"/favicon.svg"} alt={""} className="w-10 h-10" color="black" style={{ color: 'black' }} />
+        <img
+          src={"/favicon.svg"}
+          alt={""}
+          className="w-10 h-10"
+          color="black"
+          style={{ color: "black" }}
+        />
         <p className="text-2xl font-medium ">Gradworks</p>
       </div>
 
