@@ -287,11 +287,9 @@ const Projects = () => {
         {/* Main Content - Projects List */}
         <div className="max-w-7xl mx-auto px-4 py-8 gap-4">
           {isLoading ? (
-            !hydrated ? (
-              <div className="flex items-center justify-center h-64">
-                <Loader2 className="animate-spin" />
-              </div>
-            ) : null
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="animate-spin" />
+            </div>
           ) : (
             <div className="grid grid-cols-1 gap-6">
               {filteredProjects.map((project: ProjectData) => (

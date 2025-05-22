@@ -243,9 +243,9 @@ const Department = () => {
             </div>
           )}
         </div>
-      ) : !hydrated ? (
+      ) : (
         <Loader2 className="animate-spin" />
-      ) : null}
+      )}
     </DashboardLayout>
   );
 };
