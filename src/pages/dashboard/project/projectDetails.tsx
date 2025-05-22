@@ -157,11 +157,9 @@ const ProjectDetails = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        {!hydrated ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-gray-600">Loading project data...</div>
-          </div>
-        ) : null}
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-600">Loading project data...</div>
+        </div>
       </DashboardLayout>
     );
   }
