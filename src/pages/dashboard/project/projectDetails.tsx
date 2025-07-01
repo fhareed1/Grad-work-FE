@@ -17,6 +17,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { Tag } from "@/types/tag";
+import { departmentType } from "@/types/auth";
 
 interface College {
   id: string;
@@ -68,6 +70,30 @@ interface ProjectData {
   keywords: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+interface RelatedProject {
+  id: string;
+  title: string;
+  abstract?: string;
+  year?: number;
+  authors: Author[];
+  supervisor?: Supervisor;
+  department?: departmentType;
+  tags: Tag[];
+  categories?: string;
+  similarityScore: number;
+  matchingTags: number;
+  matchingCategories: number;
+}
+
+export interface RelatedProjectsResponse {
+  relatedProjects: RelatedProject[];
+  totalFound: number;
+  currentProject: {
+    id: string;
+    title: string;
+  };
 }
 
 const ProjectDetails = () => {
@@ -154,6 +180,16 @@ const ProjectDetails = () => {
     enabled: !!schoolId && !!collegeId && !!departmentId && !!projectId,
   });
 
+  const { data: projectsRelated, isLoading: isLoadingRelated } = useQuery({
+    queryKey: ["projectsRelated", projectId],
+    queryFn: () =>
+      projectServices.getRelatedProjects(
+        schoolId as string,
+        collegeId as string
+      ),
+    enabled: !!schoolId && !!collegeId,
+  });
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -195,23 +231,23 @@ const ProjectDetails = () => {
   );
 
   // Sample related projects (since they're not in the API data)
-  const sampleRelatedProjects = [
-    {
-      id: "1",
-      title: "Machine Learning for Student Performance Analysis",
-      author: "Jane Smith",
-    },
-    {
-      id: "2",
-      title: "Cloud-Based Repository for Academic Publications",
-      author: "Michael Jones",
-    },
-    {
-      id: "3",
-      title: "Web-Based Project Management for Academic Teams",
-      author: "Amanda Chen",
-    },
-  ];
+  // const sampleRelatedProjects = [
+  //   {
+  //     id: "1",
+  //     title: "Machine Learning for Student Performance Analysis",
+  //     author: "Jane Smith",
+  //   },
+  //   {
+  //     id: "2",
+  //     title: "Cloud-Based Repository for Academic Publications",
+  //     author: "Michael Jones",
+  //   },
+  //   {
+  //     id: "3",
+  //     title: "Web-Based Project Management for Academic Teams",
+  //     author: "Amanda Chen",
+  //   },
+  // ];
 
   return (
     <DashboardLayout
@@ -536,27 +572,123 @@ const ProjectDetails = () => {
                     Related Projects
                   </h2>
 
-                  <div className="space-y-4">
-                    {sampleRelatedProjects.map((relatedProject) => (
-                      <div
-                        key={relatedProject.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50"
-                      >
-                        <h3 className="font-medium text-gray-800 mb-1">
-                          {relatedProject.title}
-                        </h3>
-                        <p className="text-gray-600">
-                          By {relatedProject.author}
-                        </p>
-                        <a
-                          href={`/projects/${relatedProject.id}`}
-                          className="text-indigo-600 text-sm font-medium mt-2 inline-block hover:text-indigo-800"
-                        >
-                          View Project →
-                        </a>
+                  {isLoadingRelated ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                      <span className="ml-2 text-gray-600">
+                        Loading related projects...
+                      </span>
+                    </div>
+                  ) : projectsRelated?.relatedProjects?.length > 0 ? (
+                    <div className="space-y-4">
+                      {projectsRelated.relatedProjects.map(
+                        (relatedProject: RelatedProject) => (
+                          <div
+                            key={relatedProject.id}
+                            className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-medium text-gray-800 mb-1 flex-1">
+                                {relatedProject.title}
+                              </h3>
+                              {relatedProject.similarityScore && (
+                                <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full ml-2">
+                                  {relatedProject.similarityScore} pts
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="text-gray-600 text-sm mb-2">
+                              By{" "}
+                              {relatedProject.authors
+                                ?.map(
+                                  (author: Author) =>
+                                    `${author.firstName} ${author.lastName}`
+                                )
+                                .join(", ") || "Unknown Author"}
+                              {relatedProject.supervisor && (
+                                <span>
+                                  {" "}
+                                  • Supervised by{" "}
+                                  {relatedProject.supervisor.name}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="text-gray-500 text-sm mb-2">
+                              {relatedProject.department?.name}
+                              {relatedProject.year &&
+                                ` • ${relatedProject.year}`}
+                            </div>
+
+                            {/* Show similarity details */}
+                            {(relatedProject.matchingTags > 0 ||
+                              relatedProject.matchingCategories > 0) && (
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {relatedProject.matchingTags > 0 && (
+                                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                                    {relatedProject.matchingTags} matching tags
+                                  </span>
+                                )}
+                                {relatedProject.matchingCategories > 0 && (
+                                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                                    {relatedProject.matchingCategories} matching
+                                    categories
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Show some tags */}
+                            {relatedProject.tags?.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-3">
+                                {relatedProject.tags
+                                  .slice(0, 3)
+                                  .map((tag: Tag) => (
+                                    <span
+                                      key={tag.id}
+                                      className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
+                                    >
+                                      {tag.name}
+                                    </span>
+                                  ))}
+                                {relatedProject.tags.length > 3 && (
+                                  <span className="text-gray-500 text-xs">
+                                    +{relatedProject.tags.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            <a
+                              href={`/projects/${relatedProject.id}`}
+                              className="text-indigo-600 text-sm font-medium mt-2 inline-block hover:text-indigo-800 transition-colors"
+                            >
+                              View Project →
+                            </a>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="text-gray-500 mb-2">
+                        No related projects found
                       </div>
-                    ))}
-                  </div>
+                      <p className="text-sm text-gray-400">
+                        We couldn't find any projects similar to this one based
+                        on tags, categories, or keywords.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Show total found count */}
+                  {projectsRelated?.totalFound > 0 && (
+                    <div className="mt-4 pt-4 border-t text-sm text-gray-500 text-center">
+                      Showing {projectsRelated.relatedProjects?.length || 0} of{" "}
+                      {projectsRelated.totalFound} related projects
+                    </div>
+                  )}
                 </div>
               )}
             </div>
