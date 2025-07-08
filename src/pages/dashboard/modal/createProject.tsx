@@ -108,7 +108,7 @@ const MultiStepFormDialog = () => {
     title: "",
     abstract: "",
     authorIds: [user?.id ?? ""],
-    supervisor: {}, // Empty object instead of separate supervisorId and newSupervisor
+    supervisor: {},
     schoolId: `${user?.schoolId}`,
     departmentId: "",
     year: "",
@@ -126,7 +126,7 @@ const MultiStepFormDialog = () => {
   // Validation states
   const [validated, setValidated] = useState(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [isUploaded, setIsUploaded] = useState<boolean>(false);
+  const [isUploaded, setIsUploaded] = useState<boolean>(false);   
 
   // Selected file reference
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -890,7 +890,7 @@ const MultiStepFormDialog = () => {
                     value={formData.year}
                     onChange={handleChange}
                     min="2000"
-                    max="2100"
+                    max="2025"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>

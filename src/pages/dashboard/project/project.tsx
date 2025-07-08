@@ -31,6 +31,7 @@ const Projects = () => {
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("newest");
   const [yearFilter, setYearFilter] = useState<string>("all");
+  const [supervisorFilter, setSupervisorFilter] = useState<string>("all");
 
   const { user, schoolName, hydrated } = useAuth();
   const { schoolId, collegeId, departmentId } = useParams<{
@@ -134,6 +135,20 @@ const Projects = () => {
       break;
     default:
       break;
+  }
+
+  const supervisors = [
+    ...new Set(
+      projects.map((project) => project.supervisor?.name || "Not assigned")
+    ),
+  ].sort();
+
+  // Filter by supervisor
+  if (supervisorFilter !== "all") {
+    filteredProjects = filteredProjects.filter(
+      (project: ProjectData) =>
+        (project.supervisor?.name || "Not assigned") === supervisorFilter
+    );
   }
 
   // Get available years for filtering
@@ -256,9 +271,11 @@ const Projects = () => {
             </div>
 
             {/* Filter Panel (shown when filter button clicked) */}
+
             {filterOpen && (
               <div className="mt-4 pb-3 border-t border-gray-200 pt-3">
                 <div className="flex flex-wrap gap-4">
+                  {/* Year Filter (existing) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Year
@@ -277,7 +294,24 @@ const Projects = () => {
                     </select>
                   </div>
 
-                  {/* Additional filters could be added here */}
+                  {/* Supervisor Filter (new) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Supervisor
+                    </label>
+                    <select
+                      value={supervisorFilter}
+                      onChange={(e) => setSupervisorFilter(e.target.value)}
+                      className="border border-gray-300 rounded-md px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="all">All Supervisors</option>
+                      {supervisors.map((supervisor) => (
+                        <option key={supervisor} value={supervisor}>
+                          {supervisor}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             )}

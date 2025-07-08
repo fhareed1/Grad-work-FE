@@ -1,4 +1,5 @@
 import apiClient from "@/config/axiosInstance";
+
 import { RelatedProjectsResponse } from "@/pages/dashboard/project/projectDetails";
 import { CreateProjectPayload } from "@/types/project";
 
@@ -40,6 +41,19 @@ const createProject = async (
   return response;
 };
 
+// Update a project
+const updateProject = async (
+  payload: CreateProjectPayload,
+  school_id: string,
+  project_id: string
+) => {
+  const response = await apiClient.put(
+    `/school/${school_id}/project/${project_id}`,
+    payload
+  );
+  return response.data;
+};
+
 // Get related projects by score rating
 const getRelatedProjects = async (school_id: string, project_id: string) => {
   const response = await apiClient.get(
@@ -48,18 +62,21 @@ const getRelatedProjects = async (school_id: string, project_id: string) => {
   return response.data;
 };
 
-const getDetailedRelatedProjects = async (school_id: string, project_id: string): Promise<RelatedProjectsResponse> => {
+const getDetailedRelatedProjects = async (
+  school_id: string,
+  project_id: string
+): Promise<RelatedProjectsResponse> => {
   const response = await apiClient.get(
     `/school/${school_id}/project/${project_id}/related/detailed?limit=8`
   );
   return response.data;
 };
 
-
 const projectServices = {
   getAllProjects,
   getProjectById,
   createProject,
+  updateProject,
   getRelatedProjects,
   getDetailedRelatedProjects,
 };
