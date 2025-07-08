@@ -36,7 +36,7 @@ type EditProjectProps = {
   onOpen: boolean;
   onOpenChange: (open: boolean) => void;
   projectData: ProjectData | null;
-  setProjectData: React.Dispatch<React.SetStateAction<ProjectData | null>>;
+  setProjectData?: React.Dispatch<React.SetStateAction<ProjectData | null>>;
   onSave?: (updatedProject: ProjectData) => Promise<void>;
 };
 

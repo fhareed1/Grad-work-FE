@@ -79,8 +79,8 @@ export interface RelatedProjectsResponse {
 }
 
 type ProjectDetailsProps = {
-  projectData: ProjectData | null;
-  setProjectData: React.Dispatch<React.SetStateAction<ProjectData | null>>;
+  projectData?: ProjectData | null;
+  setProjectData?: React.Dispatch<React.SetStateAction<ProjectData | null>>;
   onUpdateProject?: (updatedProject: ProjectData) => Promise<void>;
 };
 
@@ -224,7 +224,9 @@ const ProjectDetails = ({
         await onUpdateProject(updatedProject);
       }
       // Update the project data state
-      setProjectData(updatedProject);
+      if (setProjectData) {
+        setProjectData(updatedProject);
+      }
       // You might want to show a success message here
     } catch (error) {
       console.error("Failed to update project:", error);
