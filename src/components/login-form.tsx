@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { LoginType } from "@/types/auth";
 import { useMutation } from "@tanstack/react-query";
 import authServices from "@/services/authServices";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export function LoginForm({
   className,
@@ -24,6 +24,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -39,8 +40,8 @@ export function LoginForm({
         window.location.reload();
       }, 100); // 100ms should be enough
     },
-    onError: (data) => {
-      toast.error(`Login failed: ${data.message}`);
+    onError: (Response) => {
+      toast.error(`Login failed: ${Response.message}`);
     },
   });
 
@@ -98,25 +99,32 @@ export function LoginForm({
                 <div className="grid gap-3">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    {/* <a
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a> */}
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="********"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="********"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 cursor-pointer"
+                      tabIndex={-1}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={status === "pending"}
                 >
                   {status === "pending" ? (

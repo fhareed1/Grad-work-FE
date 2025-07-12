@@ -1002,10 +1002,10 @@ const MultiStepFormDialog = () => {
                           <span>Uploading...</span>
                         </>
                       ) : (
-                        <>
+                        <div className="cursor-pointer flex items-center gap-2">
                           <Upload className="h-4 w-4" />
                           <span>Upload file</span>
-                        </>
+                        </div>
                       )}
                     </Button>
                   ) : (
